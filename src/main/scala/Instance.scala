@@ -27,7 +27,7 @@ class Instance (NF: Int , NL: Int , OC: Array[Int] , SC : Array[Array[Int]]) {
         val line = sc.nextLine()
         val scLn = new Scanner(line)
         scLn.next()
-        OC = OC ++ Array[scLn.nextDouble()]
+        OC = OC ++ Array[Double](scLn.nextDouble())
         i += 1
         scLn.close()
       }
@@ -39,7 +39,7 @@ class Instance (NF: Int , NL: Int , OC: Array[Int] , SC : Array[Array[Int]]) {
         val scLn = new Scanner(line)
         var k = 1
         while (k <= NF) {
-          L = L ++ Array[scLn.nextDouble()]
+          L = L ++ Array[Double](scLn.nextDouble())
           k +=1
         }
         SC = SC ++ L
