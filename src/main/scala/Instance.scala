@@ -24,8 +24,8 @@ class Instance (NF: Int , NL: Int , OC: Array[Int] , SC : Array[Array[Int]]) {
       NL = sc.nextInt()
       var i = 1
       while (i <= NF) {
-        val línea = sc.nextLine()
-        val scLn = new Scanner(línea)
+        val line = sc.nextLine()
+        val scLn = new Scanner(line)
         scLn.next()
         OC = OC ++ Array[scLn.nextDouble()]
         i += 1
@@ -35,8 +35,8 @@ class Instance (NF: Int , NL: Int , OC: Array[Int] , SC : Array[Array[Int]]) {
       while (j <= NL) {
         sc.nextLine()
         var L = Array[Double]()
-        val línea = sc.nextLine()
-        val scLn = new Scanner(línea)
+        val line = sc.nextLine()
+        val scLn = new Scanner(line)
         var k = 1
         while (k <= NF) {
           L = L ++ Array[scLn.nextDouble()]
@@ -46,13 +46,9 @@ class Instance (NF: Int , NL: Int , OC: Array[Int] , SC : Array[Array[Int]]) {
         j += 1
       }
       sc.close()
-      return (NF,NL,OC,SC)
-
+      (NF,NL,OC,SC)
     }
-
-    println(parametros("cap71.txt"))
   }
-
 
 
 }
