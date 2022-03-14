@@ -39,7 +39,7 @@ class Instance (numLocations: Int , numCustomers: Int , openCost: Array[Double] 
       new Instance(numLocations, numCustomers, openCost, serviceCost)
     }
 
-    def fromFileOrLib(nombreFich: String): Unit = {
+    def fromFileOrLib(nombreFich: String): Instance = {
       var numLocations = 0
       var numCustomers = 0
       val fich = new File(nombreFich)
@@ -55,7 +55,6 @@ class Instance (numLocations: Int , numCustomers: Int , openCost: Array[Double] 
         i += 1
         scLn.close()
       }
-      OC
       var SC = Array.ofDim[Double](numCustomers, numLocations)
       var j = 0
       while (j < numCustomers) {
@@ -73,7 +72,7 @@ class Instance (numLocations: Int , numCustomers: Int , openCost: Array[Double] 
       Instance(numLocations, numCustomers, OC, SC)
     }
 
-    def fromFile(nombreFich: String): Unit = {
+    def fromFile(nombreFich: String): Instance = {
       var numLocations = 0
       var numCustomers = 0
       val fich = new File(nombreFich)
@@ -86,7 +85,6 @@ class Instance (numLocations: Int , numCustomers: Int , openCost: Array[Double] 
         OC(i) = sc.nextDouble()
         i += 1
       }
-      OC
       var SC = Array.ofDim[Double](numCustomers, numLocations)
       var j = 0
       while (j < numCustomers) {
@@ -117,9 +115,9 @@ class Instance (numLocations: Int , numCustomers: Int , openCost: Array[Double] 
     }
 
 
-    def random(seed: Int, numFacilities: Int, numLocations: Int): Instance
-    =
+    def random(seed: Int, numFacilities: Int, numLocations: Int): Instance =
       random1(new Random(seed), numFacilities, numLocations)
+
   }
 
 
