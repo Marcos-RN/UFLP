@@ -56,8 +56,6 @@ class Instance (val numLocations: Int , val numCustomers: Int , val openCost: Ar
       val OC = Array.ofDim[Double](numLocations)
       var i = 0
       while (i < numLocations) {
-        //val line = sc.nextLine()
-        //val scLn = new Scanner(line)
         sc.nextDouble()
         OC(i) = sc.nextDouble()
         i += 1
@@ -103,8 +101,8 @@ class Instance (val numLocations: Int , val numCustomers: Int , val openCost: Ar
     }
 
     def random(rnd: Random, numLocations: Int, numCustomers: Int): Instance = {
-      var openCost = Array.ofDim[Double](numLocations)
-      var serviceCost = Array.ofDim[Double](numCustomers, numLocations)
+      val openCost = Array.ofDim[Double](numLocations)
+      val serviceCost = Array.ofDim[Double](numCustomers, numLocations)
       val OC = rnd.nextInt().abs
       for (i <- 0 until numLocations) {
         openCost(i) = OC
