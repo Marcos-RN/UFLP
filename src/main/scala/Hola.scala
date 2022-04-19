@@ -5,7 +5,9 @@ object Hola extends App{
 }
 object arr extends App{
   var A = Array[Int]()
+  var B = Array[Int]()
   A = Array(2,5,6)
+  B = Array(4,8)
   println(A)
 }
 

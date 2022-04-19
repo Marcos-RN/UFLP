@@ -1,23 +1,40 @@
-class Solution (val sol: Array[Boolean], val service : Array[Array[Int]]) {
+import scala.collection.mutable.ArrayBuffer
 
-}
+class Solution (val openFacilities: Array[Boolean]) {
+
+  //def facilities :
+
+  def eval(instance: Instance) : Double = {
+      var total = 0.0
+      for (i <- 0 until instance.numCustomers) {
+        val customer = instance.serviceCost(i)
+        val open = ArrayBuffer[Double]()
+        for (k <- customer.indices) {
+          if (openFacilities(k)) open += customer(k)
+        }
+        val chosenFacility = open.min
+        total += chosenFacility
+      }
+      for (h <- openFacilities.indices) {
+        if (openFacilities(h)) total += instance.openCost(h)
+      }
+      total
+    }
+  }
+
 
 object Solution extends App {
-  def eval(instance: Instance, solution: Solution): Double = {
-    val openFacilities = solution.sol
-    val serv = solution.service
-    val openCost = instance.openCost
-    val serviceCost = instance.serviceCost
-    var total = 0.0
-    for (i <- 0 until instance.numLocations) {
-      if (openFacilities(i)) total += openCost(i)
-      val values = serv(i)
-      for (j <- values.indices) {
-        total += serviceCost(i)(j)
-      }
-    }
-    total
+
+  def apply(sol : Array[Boolean]): Solution = {
+    new Solution(sol)
   }
+}
+
+object solTest extends App {
+  val inst2 = Instance.fromFile("instejemplo.txt")
+  val sol = Array[Boolean](true,false,false,false)
+  val sol2 = Solution(sol)
+  println(sol2.eval(inst2))
 }
 
 

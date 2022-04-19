@@ -3,6 +3,9 @@ import scala.Array
 
 class GRASP (val instance: Instance) {
 
+  //def solve(n: Int) : Solution = {}
+
+
 }
 
 object GRASP extends App {
@@ -43,4 +46,7 @@ object graspTest extends App {
   val inst1 = Instance.fromFileOrLib("cap71.txt")
   inst1.toFile("pruebaInstance")
   GRASP.firstGrasp(inst1)
+
+  val grasp1 = new GRASP(inst1)
+  //val sol1 = grasp1.solve()
 }
