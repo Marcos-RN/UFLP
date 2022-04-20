@@ -1,3 +1,5 @@
+import util.random.xoShiRo256StarStar.Random
+
 import java.io.File
 
 object Hola extends App{
@@ -6,9 +8,11 @@ object Hola extends App{
 object arr extends App{
   var A = Array[Int]()
   var B = Array[Int]()
-  A = Array(2,5,6)
+  A = Array(5,25,63,1,9,100)
   B = Array(4,8)
-  println(A)
+  var C = A.sorted
+  println(A.mkString)
+  println(C.mkString)
 }
 
 object file extends App {
@@ -22,4 +26,12 @@ def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
     data.foreach(p.println)
   }
 
+}
+
+object randomTest extends App {
+
+  val rnd = Random(1)
+  for (i <- 0 to 10) {
+    println(rnd.uniform(10))
+  }
 }

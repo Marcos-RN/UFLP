@@ -24,7 +24,9 @@ class Greedy (val instance: Instance) {
         evalSol2(i) = Solution.apply(arraySol(i)).eval(instance)
       }
       val minVal = evalSol2.min
-      println(minVal)
+      //println(minVal)
+      //En el siguiente paso del bucle, se cambian todos los elementos de la solucion a "true", cuando solo quiero cambiar el elemento que pertenece al lugar
+      //correspondiente a la instalación que quiere abrir. En el GRASP pasa igual.
       if (minVal == oldVal) c = 1
       else solution(evalSol2.indexOf(minVal)) = true
       println(solution.mkString)
@@ -42,12 +44,13 @@ object Greedy extends App {
 }
 
 object greedyTest extends App {
+  java.util.Locale.setDefault(java.util.Locale.ENGLISH)
   val inst = Instance.fromFile("instejemplo.txt")
   val instGreedy = Greedy(inst)
   val sol = instGreedy.solve
   println(sol.eval(inst))
-  //val inst2 = Instance.fromFileOrLib("cap71.txt")
-  //val instGreedy2 = Greedy(inst2)
-  //val sol2 = instGreedy2.solve
-  //println(sol2.eval(inst2))
+  val inst2 = Instance.fromFileOrLib("cap71.txt")
+  val instGreedy2 = Greedy(inst2)
+  val sol2 = instGreedy2.solve
+  println(sol2.eval(inst2))
 }
