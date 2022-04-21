@@ -47,7 +47,7 @@ object solTest extends App {
   val inst2 = Instance.fromFile("instejemplo2.txt")
   val sol = Array[Boolean](true,false,true,false)
   val sol2 = Solution(sol)
-  //println(sol2.eval(inst2))
+  println(sol2.eval(inst2))
   println(sol2)
 }
 

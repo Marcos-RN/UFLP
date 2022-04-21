@@ -46,9 +46,6 @@ class Greedy (val instance: Instance) {
     }
     Solution.apply(solution)
   }
-
-
-
 }
 
 object Greedy {
