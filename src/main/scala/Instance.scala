@@ -34,7 +34,7 @@ class Instance (val numLocations: Int , val numCustomers: Int , val openCost: Ar
 
 }
 
-object Instance extends App {
+object Instance  {
 
   import java.util.Scanner
 

@@ -41,7 +41,7 @@ class GRASP (val instance: Instance) {
 
 }
 
-object GRASP extends App {
+object GRASP {
 
   def apply(instance: Instance): GRASP = {
     new GRASP(instance)
