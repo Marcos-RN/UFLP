@@ -6,9 +6,11 @@ class Greedy (val instance: Instance) {
     val evalSol = Array.ofDim[Double](instance.numLocations)
     val bestOption = Array.ofDim[Double](instance.numCustomers)
     for (i <- 0 until instance.numLocations) {
-      val sol = Array.ofDim[Boolean](instance.numLocations)
-      sol(i) = true
-      evalSol(i) = Solution.apply(sol).eval(instance)
+      var sum = 0.0
+      for (j <- 0 until instance.numCustomers) {
+        sum += instance.serviceCost(j)(i)
+      }
+      evalSol(i) = sum
     }
     val first = evalSol.min
     println(first)
@@ -18,13 +20,14 @@ class Greedy (val instance: Instance) {
     for (i <- bestOption.indices) {
       bestOption(i) = instance.serviceCost(i)(ind)
     }
-    var c = 0
-    while (c == 0){
-      var total = Solution.apply(solution).eval(instance)
-      var newFacVal = Solution.apply(solution).eval(instance)
+    var goOn = true
+    var solValue = first
+    while (goOn){
+      var total = solValue
+      var newFacVal = solValue
       var newFacInd = 0
       for (i <- solution.indices) {
-        var objValue = Solution.apply(solution).eval(instance)
+        var objValue = solValue
         if (!solution(i)) {
           objValue += instance.openCost(i)
           for (j <- bestOption.indices) {
@@ -40,8 +43,13 @@ class Greedy (val instance: Instance) {
       if (newFacVal < total) {
         total = newFacVal
         solution(newFacInd) = true
+        for (i <- bestOption.indices) {
+          if (instance.serviceCost(i)(newFacInd) < bestOption(i))
+            bestOption(i) = instance.serviceCost(i)(newFacInd)
+        }
+        solValue = newFacVal
       }
-      else c = 1
+      else goOn = false
       println(solution.mkString(","))
     }
     Solution.apply(solution)
@@ -61,7 +69,7 @@ object greedyTest extends App {
   //val instGreedy = Greedy(inst)
   //val sol = instGreedy.solve
   //println(sol.eval(inst))
-  val inst2 = Instance.fromFileOrLib("cap74.txt")
+  val inst2 = Instance.fromFileOrLib("cap132.txt")
   val instGreedy2 = Greedy(inst2)
   val sol2 = instGreedy2.solve
   println(sol2.eval(inst2))
