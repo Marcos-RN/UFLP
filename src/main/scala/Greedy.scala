@@ -69,7 +69,7 @@ object greedyTest extends App {
   //val instGreedy = Greedy(inst)
   //val sol = instGreedy.solve
   //println(sol.eval(inst))
-  val inst2 = Instance.fromFileOrLib("cap132.txt")
+  val inst2 = Instance.fromFileOrLib("cap73.txt")
   val instGreedy2 = Greedy(inst2)
   val sol2 = instGreedy2.solve
   println(sol2.eval(inst2))
