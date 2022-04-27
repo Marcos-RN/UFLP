@@ -10,6 +10,7 @@ class Greedy (val instance: Instance) {
       for (j <- 0 until instance.numCustomers) {
         sum += instance.serviceCost(j)(i)
       }
+      sum += instance.openCost(i)
       evalSol(i) = sum
     }
     val first = evalSol.min
@@ -23,12 +24,11 @@ class Greedy (val instance: Instance) {
     var goOn = true
     var solValue = first
     while (goOn){
-      var total = solValue
       var newFacVal = solValue
       var newFacInd = 0
       for (i <- solution.indices) {
-        var objValue = solValue
         if (!solution(i)) {
+          var objValue = solValue
           objValue += instance.openCost(i)
           for (j <- bestOption.indices) {
             if (instance.serviceCost(j)(i) < bestOption(j))
@@ -40,8 +40,7 @@ class Greedy (val instance: Instance) {
           }
         }
       }
-      if (newFacVal < total) {
-        total = newFacVal
+      if (newFacVal < solValue) {
         solution(newFacInd) = true
         for (i <- bestOption.indices) {
           if (instance.serviceCost(i)(newFacInd) < bestOption(i))
@@ -56,6 +55,7 @@ class Greedy (val instance: Instance) {
   }
 }
 
+
 object Greedy {
 
   def apply(instance: Instance): Greedy = {
@@ -69,7 +69,7 @@ object greedyTest extends App {
   //val instGreedy = Greedy(inst)
   //val sol = instGreedy.solve
   //println(sol.eval(inst))
-  val inst2 = Instance.fromFileOrLib("cap73.txt")
+  val inst2 = Instance.fromFileOrLib("cap104.txt")
   val instGreedy2 = Greedy(inst2)
   val sol2 = instGreedy2.solve
   println(sol2.eval(inst2))
