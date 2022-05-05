@@ -28,8 +28,9 @@ class GRASP (val instance: Instance , val rnd : Random) {
       pq.enqueue(PQItem(i,sum))
     }
     val m = min(n,instance.numLocations)
-    var first = PQItem(0,0)
-    for (i <- 0 to m) {
+    val chosen = rnd.uniform(m)
+    var first : PQItem = null
+    for (i <- 0 to chosen) {
       first = pq.dequeue()
     }
     pq.clear()
@@ -41,39 +42,42 @@ class GRASP (val instance: Instance , val rnd : Random) {
     }
     var goOn = true
     var solValue = first.value
-    while (goOn){
+    while (goOn) {
       var newFacVal = solValue
       for (i <- solution.indices) {
-        var objValue = solValue
         if (!solution(i)) {
+          var objValue = solValue
           for (j <- bestOption.indices) {
             objValue += instance.openCost(i)
             if (instance.serviceCost(j)(i) < bestOption(j))
-              objValue -= (bestOption(j)-instance.serviceCost(j)(i))
+              objValue -= (bestOption(j) - instance.serviceCost(j)(i))
           }
           if (objValue < solValue)
-            pq.enqueue(PQItem(i,objValue))
+            pq.enqueue(PQItem(i, objValue))
         }
       }
-      val m = min(n, pq.size)
-      val chosen = rnd.uniform(m)
-      var pqSel = PQItem(0,0)
-      for (k <- 0 to chosen) {
-        pqSel = pq.dequeue()
-      }
-      newFacVal = pqSel.value
-      val ind = pqSel.index
-      pq.clear()
-      if (newFacVal < solValue) {
-        solution(ind) = true
-        for (i <- bestOption.indices) {
-          if (instance.serviceCost(i)(ind) < bestOption(i))
-            bestOption(i) = instance.serviceCost(i)(ind)
+      if (pq.isEmpty) goOn = false
+      else {
+        val m = min(n, pq.size)
+        val chosen = rnd.uniform(m)
+        var pqSel : PQItem = null
+        for (k <- 0 to chosen) {
+          pqSel = pq.dequeue()
         }
-        solValue = newFacVal
+        newFacVal = pqSel.value
+        val ind = pqSel.index
+        pq.clear()
+        if (newFacVal < solValue) {
+          solution(ind) = true
+          for (i <- bestOption.indices) {
+            if (instance.serviceCost(i)(ind) < bestOption(i))
+              bestOption(i) = instance.serviceCost(i)(ind)
+          }
+          solValue = newFacVal
+        }
+        else goOn = false
+        println(solution.mkString(","))
       }
-      else goOn = false
-      println(solution.mkString(","))
     }
     Solution.apply(solution)
   }
@@ -91,7 +95,7 @@ object GRASP {
 object graspTest extends App {
   java.util.Locale.setDefault(java.util.Locale.ENGLISH)
   val inst = Instance.fromFileOrLib("cap74.txt")
-  val rnd = new Random(0)
+  val rnd = new Random(6)
   val instGrasp2= GRASP(inst, rnd)
   val sol2 = instGrasp2.solve(5)
   println(sol2.eval(inst))
