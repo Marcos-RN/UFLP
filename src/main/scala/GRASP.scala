@@ -1,103 +1,124 @@
 import util.random.xoShiRo256StarStar.Random
 
-import scala.collection.mutable.PriorityQueue
+import scala.collection.mutable
 
-class GRASP (val instance: Instance , val rnd : Random) {
+/* Implementation of Greedy Randomized Adaptive Search Procedure
+   for solving ULFP. instance is the problem to be solved and
+   rnd is source of randomness for implementing an stochastic
+   algorithm
+ */
+class GRASP(val instance: Instance, val rnd: Random) {
 
-  case class PQItem(index: Int, value : Double) extends Ordered[PQItem] {
+  /* Items stored in priority queue represent new solutions obtained
+     from current one by opening a single new facility. They consist
+     of index of new open facility and objective value of new solution.
+     An order relationship is defined for the priority queue so that
+     items with smaller objective values have higher priorities.
+  */
+  case class PQItem(index: Int, value: Double) extends Ordered[PQItem] {
     def compare(that: PQItem): Int = -this.value.compare(that.value)
   }
 
-  def min(a : Int, b: Int): Int = {
-    if (a < b) a
-    else b
-  }
 
-  def solve(n: Int) : Solution = {
+  // RCLsz parameter defines size of restricted candidate list and
+  // inversely defines greedyness of algorithm
+  def solve(RCLsz: Int): Solution = {
+    // Current solution (all facilities closed initially)
     val solution = Array.ofDim[Boolean](instance.numLocations)
-    val evalSol = Array.ofDim[Double](instance.numLocations)
-    val bestOption = Array.ofDim[Double](instance.numCustomers)
-    val pq = new  PriorityQueue[PQItem]()
+
+    // Priority queue of new tentative solutions
+    val pq = new mutable.PriorityQueue[PQItem]()
+
+    // Consider all singleton (with just one open facility) solutions
     for (i <- 0 until instance.numLocations) {
-      var sum = 0.0
-      for (j <- 0 until instance.numCustomers) {
-        sum += instance.serviceCost(j)(i)
-      }
-      sum += instance.openCost(i)
-      evalSol(i) = sum
-      pq.enqueue(PQItem(i,sum))
+      // Compute objective value of tentative solution
+      var objValue = instance.openCost(i)
+      for (j <- 0 until instance.numCustomers)
+        objValue += instance.serviceCost(j)(i)
+
+      // Add tentative solution to priority queue
+      pq.enqueue(PQItem(i, objValue))
     }
-    val m = min(n,instance.numLocations)
-    val chosen = rnd.uniform(m)
-    var first : PQItem = null
-    for (i <- 0 to chosen) {
+
+    // Chose randomly one of best RCLsz tentative solutions
+    val chosen = rnd.uniform(RCLsz min pq.size)
+    var first: PQItem = null
+    for (i <- 0 to chosen)
       first = pq.dequeue()
-    }
-    pq.clear()
-    println(first.value)
+
+    // Update current solution and its value
     solution(first.index) = true
-    println(solution.mkString(","))
-    for (i <- bestOption.indices) {
-      bestOption(i) = instance.serviceCost(i)(first.index)
-    }
-    var goOn = true
     var solValue = first.value
+
+    // update bestOptions corresponding to current solution
+    val bestOption = Array.ofDim[Double](instance.numCustomers)
+    for (i <- bestOption.indices)
+      bestOption(i) = instance.serviceCost(i)(first.index)
+
+    var goOn = true
     while (goOn) {
-      var newFacVal = solValue
+      // Reset priority queue for this iteration
+      pq.clear()
+
+      // Try to open one of yet closed facilities
       for (i <- solution.indices) {
         if (!solution(i)) {
+          // Compute new objective value
           var objValue = solValue
+          objValue += instance.openCost(i)
           for (j <- bestOption.indices) {
-            objValue += instance.openCost(i)
             if (instance.serviceCost(j)(i) < bestOption(j))
               objValue -= (bestOption(j) - instance.serviceCost(j)(i))
           }
+          // If it improves current solution, make it a tentative new solution
           if (objValue < solValue)
             pq.enqueue(PQItem(i, objValue))
         }
       }
-      if (pq.isEmpty) goOn = false
+
+      if (pq.isEmpty)
+        goOn = false // No improving tentative solutions
       else {
-        val m = min(n, pq.size)
-        val chosen = rnd.uniform(m)
-        var pqSel : PQItem = null
-        for (k <- 0 to chosen) {
+        // Chose randomly one of best RCLsz improving solutions
+        val chosen = rnd.uniform(RCLsz min pq.size)
+        var pqSel: PQItem = null
+        for (k <- 0 to chosen)
           pqSel = pq.dequeue()
-        }
-        newFacVal = pqSel.value
+
+        // Update current solution and its value
         val ind = pqSel.index
-        pq.clear()
-        if (newFacVal < solValue) {
-          solution(ind) = true
-          for (i <- bestOption.indices) {
-            if (instance.serviceCost(i)(ind) < bestOption(i))
-              bestOption(i) = instance.serviceCost(i)(ind)
-          }
-          solValue = newFacVal
-        }
-        else goOn = false
-        println(solution.mkString(","))
+        solution(ind) = true
+        solValue = pqSel.value
+
+        // Update bestOptions for representing new current solution
+        for (i <- bestOption.indices)
+          if (instance.serviceCost(i)(ind) < bestOption(i))
+            bestOption(i) = instance.serviceCost(i)(ind)
       }
     }
-    Solution.apply(solution)
+    Solution.apply(solution, solValue)
   }
-
 }
 
 object GRASP {
-
   def apply(instance: Instance, rnd: Random): GRASP = {
     new GRASP(instance, rnd)
   }
-
 }
 
 object graspTest extends App {
   java.util.Locale.setDefault(java.util.Locale.ENGLISH)
-  val inst = Instance.fromFileOrLib("cap74.txt")
-  val rnd = new Random(6)
-  val instGrasp2= GRASP(inst, rnd)
-  val sol2 = instGrasp2.solve(5)
-  println(sol2.eval(inst))
-  println(sol2)
+  // val inst = Instance.fromFileOrLib("cap74.txt")
+  val inst = Instance.random(0, 500, 150)
+  val rnd = new Random(0)
+  val instGrasp2 = GRASP(inst, rnd)
+  var bestValue = Double.MaxValue
+  val maxIterations = 5000
+  for(i <- 0 until maxIterations) {
+    val sol2 = instGrasp2.solve(10)
+    if(sol2.objectiveValue < bestValue) {
+      bestValue = sol2.objectiveValue
+      println(sol2)
+    }
+  }
 }

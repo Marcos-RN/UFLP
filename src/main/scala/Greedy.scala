@@ -51,13 +51,12 @@ class Greedy (val instance: Instance) {
       else goOn = false
       println(solution.mkString(","))
     }
-    Solution.apply(solution)
+    Solution.apply(solution, solValue)
   }
 }
 
 
 object Greedy {
-
   def apply(instance: Instance): Greedy = {
     new Greedy(instance)
   }
@@ -69,9 +68,9 @@ object greedyTest extends App {
   //val instGreedy = Greedy(inst)
   //val sol = instGreedy.solve
   //println(sol.eval(inst))
-  val inst2 = Instance.fromFileOrLib("cap104.txt")
+  // val inst2 = Instance.fromFileOrLib("cap104.txt")
+  val inst2 = Instance.random(0, 500, 150)
   val instGreedy2 = Greedy(inst2)
   val sol2 = instGreedy2.solve
-  println(sol2.eval(inst2))
   println(sol2)
 }

@@ -1,22 +1,26 @@
 import scala.collection.mutable.ArrayBuffer
 
-class Solution (val openFacilities: Array[Boolean]) {
-
-  def facilities : Array[Int] = {
+class Solution(val openFacilities: Array[Boolean], val objectiveValue: Double) {
+  def facilities: Array[Int] = {
     val open = ArrayBuffer[Int]()
-    for (i <- openFacilities.indices) {
+    for (i <- openFacilities.indices)
       if (openFacilities(i))
-        open += (i+1)
-    }
+        open += i
     open.toArray
   }
 
-  override def toString: String = {
-    val open = facilities
-    s"Open facilities are ${open.mkString("(", ", ", ")")}"
-  }
+  override def toString: String =
+    s"Open facilities are ${facilities.mkString("(", ", ", ")")}\nObjective value is $objectiveValue"
+}
 
-  def eval(instance: Instance): Double = {
+object Solution {
+  def apply(openFacilities: Array[Boolean], objectiveValue: Double): Solution =
+    new Solution(openFacilities, objectiveValue)
+
+  def apply(openFacilities: Array[Boolean], instance: Instance): Solution =
+    new Solution(openFacilities, eval(openFacilities, instance))
+
+  def eval(openFacilities: Array[Boolean], instance: Instance): Double = {
     var total = 0.0
     for (i <- 0 until instance.numCustomers) {
       val customer = instance.serviceCost(i)
@@ -28,27 +32,18 @@ class Solution (val openFacilities: Array[Boolean]) {
       }
       total += minimum
     }
-    for (h <- openFacilities.indices) {
-      if (openFacilities(h)) total += instance.openCost(h)
-    }
+    for (h <- openFacilities.indices)
+      if (openFacilities(h))
+        total += instance.openCost(h)
     total
   }
 }
 
-
-object Solution {
-
-  def apply(sol : Array[Boolean]): Solution = {
-    new Solution(sol)
-  }
-}
-
 object solTest extends App {
-  val inst2 = Instance.fromFile("instejemplo2.txt")
-  val sol = Array[Boolean](true,false,true,false)
-  val sol2 = Solution(sol)
-  println(sol2.eval(inst2))
-  println(sol2)
+  val instance = Instance.fromFile("instejemplo2.txt")
+  val openFacilities = Array[Boolean](true, false, true, false)
+  val solution = Solution(openFacilities, Solution.eval(openFacilities, instance))
+  println(solution)
 }
 
 
