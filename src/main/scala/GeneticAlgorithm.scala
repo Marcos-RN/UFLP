@@ -120,7 +120,7 @@ class GeneticAlgorithm(instance: Instance, rnd: Random, popSz: Int, pX: Double, 
         pos = popSz - 1
       else {
         var min = 0
-        var max = instance.numLocations - 2
+        var max = popSz - 2
         var cen = true
         while (cen) {
           if (max - min == 1) {
@@ -162,6 +162,25 @@ class GeneticAlgorithm(instance: Instance, rnd: Random, popSz: Int, pX: Double, 
       replacement()
       n += 1
     }
+    val bestSol = Solution.apply(population(0).solution, population(0).fitness)
+    println(bestSol)
   }
 
+}
+
+object GeneticAlgorithm {
+  def apply(instance: Instance, rnd: Random, popSz: Int, pX: Double, pMut: Double) : GeneticAlgorithm = {
+    new GeneticAlgorithm(instance, rnd, popSz, pX, pMut)
+  }
+}
+
+object GaTest extends App {
+  java.util.Locale.setDefault(java.util.Locale.ENGLISH)
+  val inst = Instance.fromFileOrLib("cap74.txt")
+  val inst2 = Instance.random(0, 500, 150)
+  val rnd = new Random(5)
+  val pMut = 1.0/inst.numLocations
+  val instGA = GeneticAlgorithm(inst, rnd, 10, 0.9, pMut)
+  val instGA2 = GeneticAlgorithm(inst2, rnd, 10, 0.9, pMut)
+  instGA.solve(1000)
 }
