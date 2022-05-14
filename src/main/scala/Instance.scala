@@ -115,8 +115,8 @@ object Instance  {
     Instance(numLocations, numCustomers, openCost, serviceCost)
   }
 
-  def random(seed: Int, numFacilities: Int, numLocations: Int): Instance =
-    random(new Random(seed), numFacilities, numLocations)
+  def random(seed: Int, numLocations: Int, numCustomers: Int): Instance =
+    random(new Random(seed), numLocations, numCustomers)
 
 
 }
