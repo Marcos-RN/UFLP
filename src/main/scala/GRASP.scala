@@ -108,12 +108,13 @@ object GRASP {
 
 object graspTest extends App {
   java.util.Locale.setDefault(java.util.Locale.ENGLISH)
-  // val inst = Instance.fromFileOrLib("cap74.txt")
+  val inst2 = Instance.fromFileOrLib("cap74.txt")
   val inst = Instance.random(0, 500, 150)
   val rnd = new Random(0)
-  val instGrasp2 = GRASP(inst, rnd)
+  val instGrasp = GRASP(inst, rnd)
+  val instGrasp2 = GRASP(inst2, rnd)
   var bestValue = Double.MaxValue
-  val maxIterations = 5000
+  val maxIterations = 100
   for(i <- 0 until maxIterations) {
     val sol2 = instGrasp2.solve(10)
     if(sol2.objectiveValue < bestValue) {
@@ -121,4 +122,43 @@ object graspTest extends App {
       println(sol2)
     }
   }
+}
+
+object LoggerExample extends App {
+  // Use English formats
+  import java.util.Locale
+  Locale.setDefault(new  Locale.Builder().setLanguage("en").setRegion("US").build())
+
+  java.util.Locale.setDefault(java.util.Locale.ENGLISH)
+  val inst = Instance.random(0, 500, 150)
+  val inst2 = Instance.fromFileOrLib("cap74.txt")
+  val rnd = new Random(0)
+  val instGrasp = GRASP(inst, rnd)
+  val instGrasp2 = GRASP(inst2, rnd)
+
+
+
+  // Crea un logger, que permite registrar soluciones de tipo Double y que incluye un temporizador
+  val logger = util.Logger[Double]()
+
+  var iter = 0
+  var best = Double.MaxValue
+
+  // Ejecutar hasta 10 segundos
+  while(logger.timer.elapsedTime() < 10.0) {
+    val sol = instGrasp.solve(10)
+    val fitness = sol.objectiveValue
+
+    // Si la solución mejora, la registramos en el logger, junto con la iteración.
+    // El logger guarda automáticamente el tiempo
+    if(fitness < best) {
+      best = fitness
+      logger.register("iter: %20d   fitness: %20.8f   time: %20.8f", iter, fitness)
+    }
+    iter += 1
+  }
+
+  // Mostramos la traza de soluciones registradas en el logger
+  logger.print()
+
 }
