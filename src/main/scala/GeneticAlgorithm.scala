@@ -147,7 +147,7 @@ class GeneticAlgorithm(instance: Instance, rnd: Random, popSz: Int, pX: Double, 
     }
   }
 
-  def solve(maxIter : Int) : Unit = {
+  def solve(maxIter : Int) : Solution = {
     initialization()
     var n = 0
     while (n < maxIter) {
@@ -163,8 +163,9 @@ class GeneticAlgorithm(instance: Instance, rnd: Random, popSz: Int, pX: Double, 
       n += 1
     }
     val bestSol = Solution.apply(population(0).solution, population(0).fitness)
-    println(bestSol)
+    bestSol
   }
+
 
 }
 
@@ -182,5 +183,47 @@ object GaTest extends App {
   val pMut = 1.0/inst.numLocations
   val instGA = GeneticAlgorithm(inst, rnd, 10, 0.9, pMut)
   val instGA2 = GeneticAlgorithm(inst2, rnd, 10, 0.9, pMut)
-  instGA.solve(1000)
+  val sol = instGA.solve(1000)
+  println(sol)
+}
+
+
+object LoggerExampleGA extends App {
+  // Use English formats
+  import java.util.Locale
+  Locale.setDefault(new  Locale.Builder().setLanguage("en").setRegion("US").build())
+
+  java.util.Locale.setDefault(java.util.Locale.ENGLISH)
+  val inst = Instance.fromFileOrLib("cap101.txt")
+  val inst2 = Instance.random(0, 500, 150)
+  val rnd = new Random(5)
+  val pMut = 1.0/inst.numLocations
+  val instGA = GeneticAlgorithm(inst, rnd, 10, 0.9, pMut)
+  val instGA2 = GeneticAlgorithm(inst2, rnd, 10, 0.9, pMut)
+
+
+
+  // Crea un logger, que permite registrar soluciones de tipo Double y que incluye un temporizador
+  val logger = util.Logger[Double]()
+
+  var iter = 0
+  var best = Double.MaxValue
+
+  // Ejecutar hasta 10 segundos
+  while(logger.timer.elapsedTime() < 30.0) {
+    val sol = instGA.solve(10)
+    val fitness = sol.objectiveValue
+
+    // Si la solución mejora, la registramos en el logger, junto con la iteración.
+    // El logger guarda automáticamente el tiempo
+    if(fitness < best) {
+      best = fitness
+      logger.register("iter: %20d   fitness: %20.8f   time: %20.8f", iter, fitness)
+    }
+    iter += 1
+  }
+
+  // Mostramos la traza de soluciones registradas en el logger
+  logger.print()
+
 }
