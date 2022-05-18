@@ -75,6 +75,32 @@ object Instance  {
     Instance(numLocations, numCustomers, OC, SC)
   }
 
+  def fromFileSimple(nombreFich: String): Instance = {
+    val fich = new File(nombreFich)
+    val sc = new Scanner(fich)
+    sc.nextLine()
+    val line = sc.nextLine()
+    val scLn = new Scanner(line)
+    val numLocations = scLn.nextInt()
+    val numCustomers = scLn.nextInt()
+    scLn.nextInt()
+    scLn.close()
+    val OC = Array.ofDim[Double](numLocations)
+    val SC = Array.ofDim[Double](numCustomers, numLocations)
+
+    while (sc.hasNextLine) {
+      val line = sc.nextLine()
+      val scLn = new Scanner(line)
+      val location = scLn.nextInt() - 1
+      OC(location) = scLn.nextDouble()
+      for(j <- 0 until numCustomers)
+        SC(j)(location) = scLn.nextDouble()
+      scLn.close()
+    }
+    sc.close()
+    Instance(numLocations, numCustomers, OC, SC)
+  }
+
   def fromFile(nombreFich: String): Instance = {
     val fich = new File(nombreFich)
     val sc = new Scanner(fich)
@@ -119,6 +145,32 @@ object Instance  {
     random(new Random(seed), numLocations, numCustomers)
 
 
+
+  def randomUniform( rnd: Random, numLocations: Int, numCustomers: Int
+                   , minOpenCost: Double, maxOpenCost: Double
+                   , minServiceCost: Double, maxServiceCost: Double
+                   ): Instance = {
+    val openCost = Array.ofDim[Double](numLocations)
+    val serviceCost = Array.ofDim[Double](numCustomers, numLocations)
+    for (i <- 0 until numLocations) {
+      openCost(i) = rnd.uniform(minOpenCost, maxOpenCost)
+    }
+    for (j <- 0 until numCustomers) {
+      for (k <- 0 until numLocations) {
+        serviceCost(j)(k) = rnd.uniform(minServiceCost, maxServiceCost)
+      }
+    }
+    Instance(numLocations, numCustomers, openCost, serviceCost)
+  }
+
+  def randomUniform( seed: Int, numLocations: Int, numCustomers: Int
+                   , minOpenCost: Double, maxOpenCost: Double
+                   , minServiceCost: Double, maxServiceCost: Double
+                   ): Instance =
+    randomUniform( Random(seed), numLocations, numCustomers
+                 , minOpenCost, maxOpenCost
+                 , minServiceCost, maxServiceCost
+                 )
 }
 
 object instanceTest extends App {
@@ -131,3 +183,16 @@ object instanceTest extends App {
 
 
 
+object ExampleInstances {
+
+  lazy val inst1 = Instance.fromFileOrLib("data/ORlib/cap74.txt")
+  lazy val inst2 = Instance.random(0, 500, 250)
+
+  lazy val inst3 = Instance.randomUniform(0, 250, 1000, 100000, 500000, 1000, 5000)
+  lazy val inst4 = Instance.fromFileOrLib("data/ORlib/M/T/MT1") //*
+  lazy val inst5 = Instance.fromFileOrLib("data/ORlib/M/S/MS1")
+  lazy val inst6 = Instance.fromFileOrLib("data/ORlib/M/R/MR5")
+
+  lazy val inst7 = Instance.fromFileSimple("data/Simple/kmedian/1000-10")
+  lazy val inst8 = Instance.fromFileSimple("data/Simple/KoerkelGhoshAsymmetric/750/a/ga750a-1")
+}

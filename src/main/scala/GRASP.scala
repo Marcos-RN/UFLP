@@ -1,3 +1,4 @@
+import util.Logger
 import util.random.xoShiRo256StarStar.Random
 
 import scala.collection.mutable
@@ -106,59 +107,82 @@ object GRASP {
   }
 }
 
-object graspTest extends App {
-  java.util.Locale.setDefault(java.util.Locale.ENGLISH)
-  val inst2 = Instance.fromFileOrLib("cap74.txt")
-  val inst = Instance.random(0, 500, 150)
-  val rnd = new Random(0)
-  val instGrasp = GRASP(inst, rnd)
-  val instGrasp2 = GRASP(inst2, rnd)
-  var bestValue = Double.MaxValue
-  val maxIterations = 100
-  for(i <- 0 until maxIterations) {
-    val sol2 = instGrasp2.solve(10)
-    if(sol2.objectiveValue < bestValue) {
-      bestValue = sol2.objectiveValue
-      println(sol2)
+class IteratedGRASP(val instance: Instance, val rnd: Random, RCLsz: Int) {
+  // Crea un logger, que permite registrar soluciones de tipo Double y que incluye un temporizador
+  val logger: Logger[Double] = Logger[Double]()
+
+  def solve(maxTime: Double): Solution = {
+    var iter = 0
+    var bestSolution: Solution = null
+
+    val grasp = GRASP(instance, rnd)
+    // Ejecutar hasta maxTime segundos
+    while(logger.timer.elapsedTime() < maxTime) {
+      val sol = grasp.solve(RCLsz)
+
+      // Si la solución mejora, la registramos en el logger, junto con la iteración.
+      // El logger guarda automáticamente el tiempo
+      if(bestSolution == null || sol.objectiveValue < bestSolution.objectiveValue) {
+        bestSolution = sol
+        logger.register("iter: %20d   fitness: %20.8f   time: %20.8f", iter, bestSolution.objectiveValue)
+      }
+      iter += 1
     }
+    bestSolution
   }
 }
 
-object LoggerExample extends App {
+object IteratedGRASP {
+  def apply(instance: Instance, rnd: Random, RCLsz: Int): IteratedGRASP =
+    new IteratedGRASP(instance, rnd, RCLsz)
+}
+
+object IteratedGRASPTest extends App {
   // Use English formats
   import java.util.Locale
-  Locale.setDefault(new  Locale.Builder().setLanguage("en").setRegion("US").build())
+  Locale.setDefault(Locale.ENGLISH)
 
-  java.util.Locale.setDefault(java.util.Locale.ENGLISH)
-  val inst = Instance.random(0, 500, 150)
-  val inst2 = Instance.fromFileOrLib("cap74.txt")
-  val rnd = new Random(0)
-  val instGrasp = GRASP(inst, rnd)
-  val instGrasp2 = GRASP(inst2, rnd)
+  def test(instance: Instance, seed: Int): Unit = {
+    val RCLsz = 8
+    val maxTime = 60 // seconds
+    val rnd = Random(seed)
+    val grasp = IteratedGRASP(instance, rnd, RCLsz)
+    val solution = grasp.solve(maxTime)
+    println(solution)
+    grasp.logger.print()
+  }
+  test(ExampleInstances.inst8, 0)
+}
 
+object MainIteratedGRASP extends App {
+  // Use English formats
+  import java.util.Locale
+  Locale.setDefault(Locale.ENGLISH)
 
-
-  // Crea un logger, que permite registrar soluciones de tipo Double y que incluye un temporizador
-  val logger = util.Logger[Double]()
-
-  var iter = 0
-  var best = Double.MaxValue
-
-  // Ejecutar hasta 10 segundos
-  while(logger.timer.elapsedTime() < 10.0) {
-    val sol = instGrasp.solve(10)
-    val fitness = sol.objectiveValue
-
-    // Si la solución mejora, la registramos en el logger, junto con la iteración.
-    // El logger guarda automáticamente el tiempo
-    if(fitness < best) {
-      best = fitness
-      logger.register("iter: %20d   fitness: %20.8f   time: %20.8f", iter, fitness)
-    }
-    iter += 1
+  if(args.length < 3) {
+    println("Usage: <seed> <file> <RCLsz> <maxTime>")
+    System.exit(0)
   }
 
-  // Mostramos la traza de soluciones registradas en el logger
-  logger.print()
+  val seed = args(0).toInt
+  val fileName = args(1)
+  val RCLsz = args(2).toInt
+  val maxTime = args(3).toDouble
 
+  val rnd = Random(seed)
+
+  val instance =
+    if(fileName.contains("ORlib"))
+      Instance.fromFileOrLib(fileName)
+    else if(fileName.contains("Simple"))
+      Instance.fromFileSimple(fileName)
+    else
+      Instance.fromFile(fileName)
+
+  println(s"Running IteratedGRASP on $fileName. seed=$seed, RCLsz=$RCLsz, maxTime=$maxTime")
+
+  val grasp = IteratedGRASP(instance, rnd, RCLsz)
+  val solution = grasp.solve(maxTime)
+  println(solution)
+  grasp.logger.print()
 }
