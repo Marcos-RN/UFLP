@@ -1,27 +1,38 @@
 import util.random.xoShiRo256StarStar.Random
 
+/* Implementation of Genetic Algortihm for solving ULFP.
+   instance is the problem to be solved
+   rnd is source of randomness for implementing an stochastic algorithm
+   popSz is the size of the population
+   pX is the probability of crossover
+   pMut is the probability of mutation
+ */
+
 class GeneticAlgorithm(instance: Instance, rnd: Random, popSz: Int, pX: Double, pMut: Double) {
 
+  //The probabilities pX and pMut must be between 0 and 1
   require(0 < pX && pX < 1, "Cross probability must be between 0 and 1")
   require(0 < pMut && pMut < 1, "Mutation probability must be between 0 and 1")
 
-
+  //Creation of the Individual class, each individual is basically a solution for the problem
   class Individual {
     var solution = Array.fill[Boolean](instance.numLocations)(false)
-    var fitness: Double = Double.MaxValue // aquí guardaríamos el valor objetivo de la solución
+    //Here will be kept the objective value for each solution
+    var fitness: Double = Double.MaxValue
 
-    def computeFitness: Double = Solution.eval(solution, instance) // Este método calcularía el valor objetivo de la solución almacenada en solution
+    //This method computes the objective value for the solution
+    def computeFitness: Double = Solution.eval(solution, instance)
   }
-
+  //Population represented as an Array of Individuals
   private val population = Array.fill[Individual](popSz)(new Individual)
 
-  // Aquí tendremos un hijo en cada iteración
+  //It will be a new child in each iteration of the algorithm
   private val child = new Individual
 
   def initialization(): Unit = {
-    // Aquí rellenaríamos cada uno de los individuos del array population
-    // calcularíamos su fitness, lo asignaríamos al campo fitness y  ordenaríamos
-    // en orden descendente por fitness.
+    /*Fill each Individual of Population in a random way,
+    calculate fitness and sort them in descending order by fitness value
+     */
     for (i <- population.indices) {
       for (j <- population(i).solution.indices) {
         val r = rnd.uniform(0.0, 1.0)
@@ -30,14 +41,13 @@ class GeneticAlgorithm(instance: Instance, rnd: Random, popSz: Int, pX: Double, 
       }
       population(i).fitness = population(i).computeFitness
     }
-    // Esta línea ordena population descendentemente (al estar negado) por fitness
     scala.util.Sorting.quickSort(population)(Ordering.by(sol => -sol.fitness))
   }
 
   def initializationGRASP(): Unit = {
-    // Aquí rellenaríamos cada uno de los individuos del array population
-    // calcularíamos su fitness, lo asignaríamos al campo fitness y  ordenaríamos
-    // en orden descendente por fitness.
+    /*Fill each Individual of Population using solutions given by GRASP algorithm
+      and sort them in descending order by fitness value
+     */
     for (i <- population.indices) {
       val rndm = new Random(rnd.nextInt())
       val instGrasp = GRASP(instance, rndm)
@@ -54,11 +64,10 @@ class GeneticAlgorithm(instance: Instance, rnd: Random, popSz: Int, pX: Double, 
       population(i).solution = mySol
       population(i).fitness = bestValue
     }
-    // Esta línea ordena population descendentemente (al estar negado) por fitness
     scala.util.Sorting.quickSort(population)(Ordering.by(sol => -sol.fitness))
   }
 
-  // devuelve el índice de un padre seleccionado por torneo binario
+  //Returns a "parent" index chosen by binary tournament
   def binaryTournament(): Int = {
     val a = rnd.uniform(popSz)
     val b = rnd.uniform(popSz)
@@ -66,7 +75,7 @@ class GeneticAlgorithm(instance: Instance, rnd: Random, popSz: Int, pX: Double, 
     index
   }
 
-  // dados los índices de los dos padres, mete en child el individuo cruzado
+  //Given two parent indexes, construct a child by uniform crossover
   def uniformCrossover(indexParent1: Int, indexParent2: Int): Unit = {
     val Parent1 = population(indexParent1)
     val Parent2 = population(indexParent2)
@@ -80,6 +89,7 @@ class GeneticAlgorithm(instance: Instance, rnd: Random, popSz: Int, pX: Double, 
     child.fitness = child.computeFitness
   }
 
+  //Given two parent indexes, construct a child by random crossover
   def randomCrossover(indexParent1: Int, indexParent2: Int): Unit = {
     val Parent1 = population(indexParent1)
     val Parent2 = population(indexParent2)
@@ -93,14 +103,14 @@ class GeneticAlgorithm(instance: Instance, rnd: Random, popSz: Int, pX: Double, 
     child.fitness = child.computeFitness
   }
 
-  // copia un individuo arbitrario de la población a child, por si no se realizara cruce
+  // Copies a random individual from the population to child, just in case crossover is not performed
   def copyToChild(): Unit = {
     val a = rnd.uniform(popSz)
     child.solution = population(a).solution
     child.fitness = population(a).fitness
   }
 
-  // muta el individuo almacenado en child
+  // Mutates the "child"
   def mutate(): Unit = {
     for (i <- child.solution.indices) {
       val r = rnd.uniform(0.0, 1.0)
@@ -109,8 +119,8 @@ class GeneticAlgorithm(instance: Instance, rnd: Random, popSz: Int, pX: Double, 
     }
   }
 
-  // reemplaza el peor individuo de la población con el hijo
-  // y reordena la población usando búsqueda binaria.
+  // Replaces the worst individual in the population and
+  // reorders the population using binary search.
   def replacement(): Unit = {
     var pos = 0
     if (child.fitness < population(0).fitness)
@@ -147,6 +157,7 @@ class GeneticAlgorithm(instance: Instance, rnd: Random, popSz: Int, pX: Double, 
     }
   }
 
+  //Genetic Algorithm combining the previous methods
   def solve(maxIter : Int) : Solution = {
     initialization()
     var n = 0
