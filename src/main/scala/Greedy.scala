@@ -1,3 +1,5 @@
+import util.Logger
+
 /* Implementation of Greedy Algorithm for solving ULFP.
    instance is the problem to be solved.
    */
@@ -88,4 +90,35 @@ object greedyTest extends App {
   val sol = instGreedy.solve
   //val sol2 = instGreedy2.solve
   println(sol)
+}
+
+
+object MainGreedy extends App {
+  // Use English formats
+  import java.util.Locale
+  Locale.setDefault(Locale.ENGLISH)
+
+  if(args.length < 1) {
+    println("Usage: <file>")
+    System.exit(0)
+  }
+
+  val fileName = args(0)
+
+  val instance =
+    if(fileName.contains("ORlib"))
+      Instance.fromFileOrLib(fileName)
+    else if(fileName.contains("Simple"))
+      Instance.fromFileSimple(fileName)
+    else
+      Instance.fromFile(fileName)
+
+  println(s"Running Greedy on $fileName.")
+
+  val logger: Logger[Double] = Logger[Double]()
+  val greedy = Greedy(instance)
+  val solution = greedy.solve
+  logger.register("iter: %20d   fitness: %20.8f   time: %20.8f", 0, solution.objectiveValue)
+  println(solution)
+  logger.print()
 }
