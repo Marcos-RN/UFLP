@@ -1,5 +1,4 @@
 import util.random.xoShiRo256StarStar.Random
-
 import scala.collection.mutable
 
 /* Implementation of Greedy Randomized Adaptive Search Procedure
