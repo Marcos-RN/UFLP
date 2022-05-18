@@ -1,16 +1,25 @@
-import Instance.fromFileOrLib
-
 import java.io._
 import util.random.xoShiRo256StarStar.Random
 
+/*Implementation of Instance class for representing possible
+  instances for UFLP.
+  numLocations is the number of potential locations for opening facilities
+  numCustomers is the number of customers to be served
+  openCost is an Array with the open cost for a facility in each potential location
+  serviceCost is an Array in which the position (i,j) represents the cost of serving customer i from location j
+ */
+
 class Instance (val numLocations: Int , val numCustomers: Int , val openCost: Array[Double] , val serviceCost : Array[Array[Double]]) {
 
+  // It is possible to define this class using only openCost and serviceCost and using each length to fill
+  // numLocations and numCustomers
   def this (openCost: Array[Double] , serviceCost : Array[Array[Double]]) {
     this (numLocations = openCost.length, numCustomers = serviceCost.length, openCost, serviceCost)
   }
 
   override def toString: String = s"Instance Number of potential locations = $numLocations , Instances Number of customers = $numCustomers"
 
+  // Given an instance, generate a text file with the instance values
   def toFile(nombreFich: String): Unit = {
     val fich = new File(nombreFich)
     val ps = new PrintStream(fich)
@@ -45,6 +54,9 @@ object Instance  {
     new Instance(openCost, serviceCost)
   }
 
+
+  // Read a text file with some parameters, in the OR-Library format
+  // and return an Instance object with the given parameters
   def fromFileOrLib(nombreFich: String): Instance = {
     val fich = new File(nombreFich)
     val sc = new Scanner(fich)
@@ -75,6 +87,8 @@ object Instance  {
     Instance(numLocations, numCustomers, OC, SC)
   }
 
+  // Read a text file with some parameters, in a customized format
+  // and return an Instance object with the given parameters
   def fromFile(nombreFich: String): Instance = {
     val fich = new File(nombreFich)
     val sc = new Scanner(fich)
@@ -100,6 +114,7 @@ object Instance  {
     Instance(numLocations, numCustomers, OC, SC)
   }
 
+  //Gives a random Instance for the UFLP
   def random(rnd: Random, numLocations: Int, numCustomers: Int): Instance = {
     val openCost = Array.ofDim[Double](numLocations)
     val serviceCost = Array.ofDim[Double](numCustomers, numLocations)
