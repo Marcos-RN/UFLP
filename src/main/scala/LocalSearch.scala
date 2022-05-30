@@ -20,7 +20,7 @@ class LocalSearch(val instance: Instance, val solution: Solution) {
           // si mejora se abre esta instalación, se actualiza el valor de la función objetivo y se detiene el bucle
           if (newObjValue < objValue) {
             value = newObjValue
-            solution.openFacilities(i) = true
+            openFac(i) = true
             goOn = false
           }
         }
@@ -36,12 +36,12 @@ class LocalSearch(val instance: Instance, val solution: Solution) {
               var newVal = Double.MaxValue
               // se consideran los costes de servicio de todas las demas instalaciones, quedándonos con el mejor
               for (k <- 0 until i) {
-                if (solution.openFacilities(k) && instance.serviceCost(j)(k) < newVal) {
+                if (openFac(k) && instance.serviceCost(j)(k) < newVal) {
                   newVal = instance.serviceCost(j)(k)
                 }
               }
               for (k <- i+1 until instance.numLocations) {
-                if (solution.openFacilities(k) && instance.serviceCost(j)(k) < newVal) {
+                if (openFac(k) && instance.serviceCost(j)(k) < newVal) {
                   newVal = instance.serviceCost(j)(k)
                 }
               }
@@ -52,14 +52,14 @@ class LocalSearch(val instance: Instance, val solution: Solution) {
           // se cierra esta instalación, se actualiza el valor de la función objetivo y se detiene el bucle
           if (newObjValue < objValue) {
             value = newObjValue
-            solution.openFacilities(i) = false
+            openFac(i) = false
             goOn = false
           }
         }
         cont += 1
       }
     }
-    Solution(solution.openFacilities, value)
+    Solution(openFac, value)
     }
 
 
@@ -116,7 +116,7 @@ object LocalSearch {
 
 object LocalSearchTest extends App {
   java.util.Locale.setDefault(java.util.Locale.ENGLISH)
-  val inst = Instance.fromFileOrLib("cap73.txt")
+  val inst = Instance.fromFileOrLib("cap101.txt")
   val inst2 = Instance.random(7, 150, 150)
   val instGreedy = Greedy(inst)
   val instGreedy2 = Greedy(inst2)
