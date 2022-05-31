@@ -4,11 +4,10 @@ class LocalSearch(val instance: Instance, val solution: Solution) {
 
   def neighbourSearch(bestOption : Array[Double], openFac : Array[Boolean], objValue: Double) : Solution = {
     var goOn = true
-    var cont = 0
+    var i = 0
     var value = objValue
     // 2 criterios de parada: que encuentre una solución mejor o que explore todas las posibilidades y no mejore
-    while (goOn && cont < instance.numLocations) {
-      for (i <- openFac.indices) {
+    while (goOn && i < instance.numLocations) {
         //si está cerrada se "abre" y el proceso es igual que una iteración del algoritmo Greedy
         if (!openFac(i)) {
           var  newObjValue = objValue
@@ -56,9 +55,8 @@ class LocalSearch(val instance: Instance, val solution: Solution) {
             goOn = false
           }
         }
-        cont += 1
+        i += 1
       }
-    }
     Solution(openFac, value)
     }
 
@@ -116,7 +114,7 @@ object LocalSearch {
 
 object LocalSearchTest extends App {
   java.util.Locale.setDefault(java.util.Locale.ENGLISH)
-  val inst = Instance.fromFileOrLib("cap101.txt")
+  val inst = Instance.fromFileOrLib("cap72.txt")
   val inst2 = Instance.random(7, 150, 150)
   val instGreedy = Greedy(inst)
   val instGreedy2 = Greedy(inst2)
