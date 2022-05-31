@@ -20,6 +20,10 @@ class LocalSearch(val instance: Instance, val solution: Solution) {
           if (newObjValue < objValue) {
             value = newObjValue
             openFac(i) = true
+            for (j <- bestOption.indices) {
+              if (instance.serviceCost(j)(i) < bestOption(j))
+                bestOption(j) = instance.serviceCost(j)(i)
+            }
             goOn = false
           }
         }
@@ -52,6 +56,16 @@ class LocalSearch(val instance: Instance, val solution: Solution) {
           if (newObjValue < objValue) {
             value = newObjValue
             openFac(i) = false
+            for (j <- bestOption.indices) {
+              bestOption(j) = Double.MaxValue
+              for (k <- 0 until instance.numLocations) {
+                if (openFac(k)) {
+                  if (instance.serviceCost(j)(k) < bestOption(j)) {
+                    bestOption(j) = instance.serviceCost(j)(k)
+                  }
+                }
+              }
+            }
             goOn = false
           }
         }
@@ -85,20 +99,10 @@ class LocalSearch(val instance: Instance, val solution: Solution) {
       if (sol.objectiveValue == objValue)
         goOn = false
       //si mejora la solución, se actualiza el valor de la función objetivo, de las instalaciones abiertas
-      // y el de bestoption, y continua el bucle
+      // y continua el bucle
       else {
         objValue = sol.objectiveValue
         openFac = sol.openFacilities
-        for (i <- bestOption.indices) {
-          bestOption(i) = Double.MaxValue
-          for (j <- 0 until instance.numLocations) {
-            if (openFac(j)) {
-              if (instance.serviceCost(i)(j) < bestOption(i)) {
-                bestOption(i) = instance.serviceCost(i)(j)
-              }
-            }
-          }
-        }
       }
     }
     Solution(openFac,objValue)
@@ -114,19 +118,20 @@ object LocalSearch {
 
 object LocalSearchTest extends App {
   java.util.Locale.setDefault(java.util.Locale.ENGLISH)
-  val inst = Instance.fromFileOrLib("cap72.txt")
-  val inst2 = Instance.random(7, 150, 150)
+  val inst = Instance.fromFileOrLib("capc.txt")
+  val inst2 = Instance.random(20, 250, 500)
   val instGreedy = Greedy(inst)
   val instGreedy2 = Greedy(inst2)
   val sol = instGreedy.solve
   val sol2 = instGreedy2.solve
-  println(sol)
-  println()
   val local1 = LocalSearch(inst,sol)
   val local2 = LocalSearch(inst2,sol2)
   val hc1 = local1.HillClimbing
   val hc2 = local2.HillClimbing
-  println(hc1)
+  println(sol2)
+  println()
+  println(hc2)
+
 }
 
 
