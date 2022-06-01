@@ -105,6 +105,7 @@ class LocalSearch(val instance: Instance, val solution: Solution) {
         openFac = sol.openFacilities
       }
     }
+    println(objValue)
     Solution(openFac,objValue)
   }
 }
@@ -118,17 +119,17 @@ object LocalSearch {
 
 object LocalSearchTest extends App {
   java.util.Locale.setDefault(java.util.Locale.ENGLISH)
-  val inst = Instance.fromFileOrLib("capc.txt")
+  val inst = Instance.fromFileOrLib("cap72.txt")
   val inst2 = Instance.random(20, 250, 500)
   val instGreedy = Greedy(inst)
   val instGreedy2 = Greedy(inst2)
   val sol = instGreedy.solve
   val sol2 = instGreedy2.solve
+  println(sol2)
   val local1 = LocalSearch(inst,sol)
   val local2 = LocalSearch(inst2,sol2)
   val hc1 = local1.HillClimbing
   val hc2 = local2.HillClimbing
-  println(sol2)
   println()
   println(hc2)
 
