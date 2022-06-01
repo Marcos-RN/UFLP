@@ -145,12 +145,12 @@ object IteratedGRASPTest extends App {
     val RCLsz = 8
     val maxTime = 60 // seconds
     val rnd = Random(seed)
-    val grasp = IteratedGRASP(instance, rnd, RCLsz)
+    val grasp = IteratedGRASPLS(instance, rnd, RCLsz)
     val solution = grasp.solve(maxTime)
     println(solution)
     grasp.logger.print()
   }
-  test(ExampleInstances.inst8, 0)
+  test(ExampleInstances.inst2, 0)
 }
 
 object MainIteratedGRASP extends App {
@@ -185,3 +185,73 @@ object MainIteratedGRASP extends App {
   println(solution)
   grasp.logger.print()
 }
+
+
+
+class IteratedGRASPLS(val instance: Instance, val rnd: Random, RCLsz: Int) {
+  // Crea un logger, que permite registrar soluciones de tipo Double y que incluye un temporizador
+  val logger: Logger[Double] = Logger[Double]()
+
+  def solve(maxTime: Double): Solution = {
+    var iter = 0
+    var bestSolution: Solution = null
+
+    val grasp = GRASP(instance, rnd)
+    // Ejecutar hasta maxTime segundos
+    while(logger.timer.elapsedTime() < maxTime) {
+      val sol = grasp.solve(RCLsz)
+
+      val localSearch = LocalSearch(instance, sol)
+      val localSearchSol = localSearch.HillClimbing
+
+
+      // Si la solución mejora, la registramos en el logger, junto con la iteración.
+      // El logger guarda automáticamente el tiempo
+      if(bestSolution == null || localSearchSol.objectiveValue < bestSolution.objectiveValue) {
+        bestSolution = localSearchSol
+        logger.register("iter: %20d   fitness: %20.8f   time: %20.8f", iter, bestSolution.objectiveValue)
+      }
+      iter += 1
+    }
+    bestSolution
+  }
+}
+
+object IteratedGRASPLS {
+  def apply(instance: Instance, rnd: Random, RCLsz: Int): IteratedGRASPLS =
+    new IteratedGRASPLS(instance, rnd, RCLsz)
+}
+
+object MainIteratedGRASPLS extends App {
+  // Use English formats
+  import java.util.Locale
+  Locale.setDefault(Locale.ENGLISH)
+
+  if(args.length < 4) {
+    println("Usage: <seed> <file> <RCLsz> <maxTime>")
+    System.exit(0)
+  }
+
+  val seed = args(0).toInt
+  val fileName = args(1)
+  val RCLsz = args(2).toInt
+  val maxTime = args(3).toDouble
+
+  val rnd = Random(seed)
+
+  val instance =
+    if(fileName.contains("ORlib"))
+      Instance.fromFileOrLib(fileName)
+    else if(fileName.contains("Simple"))
+      Instance.fromFileSimple(fileName)
+    else
+      Instance.fromFile(fileName)
+
+  println(s"Running IteratedGRASPLS on $fileName. seed=$seed, RCLsz=$RCLsz, maxTime=$maxTime")
+
+  val grasp = IteratedGRASPLS(instance, rnd, RCLsz)
+  val solution = grasp.solve(maxTime)
+  println(solution)
+  grasp.logger.print()
+}
+

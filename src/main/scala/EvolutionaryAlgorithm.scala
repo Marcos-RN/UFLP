@@ -17,7 +17,7 @@ abstract class EvolutionaryAlgorithm(instance: Instance, rnd: Random, popSz: Int
   private val population = Array.fill[Individual](popSz)(new Individual)
 
   // Aquí tendremos un hijo en cada iteración
-  private var child = new Individual
+  protected var child = new Individual
 
   def initialization(): Unit
 
@@ -251,10 +251,10 @@ class RandomBinaryOnePointFlipWorstEA(instance: Instance, rnd: Random, popSz: In
   override def postProcess(): Unit = {}
 }
 
-
+/* CHANGED **/
 object RandomBinaryOnePointFlipWorstEA {
   def apply(instance: Instance, rnd: Random, popSz: Int, pX: Double, pMut: Double) : EvolutionaryAlgorithm = {
-    new RandomBinaryUniformFlipWorstEA(instance, rnd, popSz, pX, pMut)
+    new RandomBinaryOnePointFlipWorstEA(instance, rnd, popSz, pX, pMut)
   }
 }
 
@@ -268,15 +268,15 @@ object EATest extends App {
     val pX = 0.9
     val pMut = 1.0 / instance.numLocations
     val popSz = 100
-    val maxTime = 80.0 // seconds
+    val maxTime = 30.0 // seconds
     val rnd = Random(seed)
-    val ea = RandomBinaryUniformFlipWorstEA(instance, rnd, popSz, pX, pMut)
+    val ea = RandomBinaryOnePointFlipWorstEA(instance, rnd, popSz, pX, pMut)
     val solution = ea.solve(maxTime)
     println(solution)
     ea.logger.print()
   }
 
-  testEA(ExampleInstances.inst8, 0)
+  testEA(ExampleInstances.inst2, 0)
 }
 
 
@@ -350,6 +350,76 @@ object MainRandomBinaryUniformFlipWorstEA extends App {
   println(s"Running RandomBinaryUniformFlipWorstEA on $fileName. seed=$seed, popSz=$popSz, pX=$pX, pMut=$pMut, maxTime=$maxTime")
 
   val ea = RandomBinaryUniformFlipWorstEA(instance, rnd, popSz, pX, pMut)
+  val solution = ea.solve(maxTime)
+  println(solution)
+  ea.logger.print()
+}
+
+
+class RandomBinaryOnePointFlipWorstMA(instance: Instance, rnd: Random, popSz: Int, pX: Double, pMut: Double)
+  extends EvolutionaryAlgorithm(instance, rnd, popSz, pX, pMut) {
+
+  override def initialization(): Unit =
+    randomInitialization()
+
+  override def selection(): Int =
+    binaryTournament()
+
+  override def crossover(indexParent1: Int, indexParent2: Int): Unit =
+    onePointCrossover(indexParent1, indexParent2)
+
+  override def mutate(): Unit =
+    flipMutation()
+
+  override def replacement(): Unit =
+    replaceWorst()
+
+  override def postProcess(): Unit = {
+    val localSearch = LocalSearch(instance, Solution(child.solution, child.fitness))
+    val localSearchSol = localSearch.HillClimbing
+    child.fitness = localSearchSol.objectiveValue
+  }
+}
+
+
+object RandomBinaryOnePointFlipWorstMA {
+  def apply(instance: Instance, rnd: Random, popSz: Int, pX: Double, pMut: Double) : EvolutionaryAlgorithm = {
+    new RandomBinaryOnePointFlipWorstMA(instance, rnd, popSz, pX, pMut)
+  }
+}
+
+object MainRandomBinaryOnePointFlipWorstMA extends App {
+  // Use English formats
+  import java.util.Locale
+  Locale.setDefault(Locale.ENGLISH)
+
+  if(args.length < 3) {
+    println("Usage: <seed> <file> <maxTime>")
+    System.exit(0)
+  }
+
+  val seed = args(0).toInt
+  val fileName = args(1)
+  val maxTime = args(2).toDouble
+
+  val rnd = Random(seed)
+
+  val instance =
+    if(fileName.contains("ORlib"))
+      Instance.fromFileOrLib(fileName)
+    else if(fileName.contains("Simple"))
+      Instance.fromFileSimple(fileName)
+    else
+      Instance.fromFile(fileName)
+
+  val popSz = 100
+  val pX = 0.9
+  val pMut = 1.0 / instance.numLocations
+
+
+  println(s"Running MainRandomBinaryOnePointFlipWorstMA on $fileName. seed=$seed, popSz=$popSz, pX=$pX, pMut=$pMut, maxTime=$maxTime")
+
+  val ea = RandomBinaryOnePointFlipWorstMA(instance, rnd, popSz, pX, pMut)
   val solution = ea.solve(maxTime)
   println(solution)
   ea.logger.print()
