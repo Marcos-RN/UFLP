@@ -105,7 +105,6 @@ class LocalSearch(val instance: Instance, val solution: Solution) {
         openFac = sol.openFacilities
       }
     }
-    println(objValue)
     Solution(openFac,objValue)
   }
 }
